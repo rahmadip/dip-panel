@@ -1,11 +1,18 @@
 import streamlit as st
-from supabase import create_client
+import pandas as pd
+from st_supabase_connection import SupabaseConnection
 import bcrypt
 
-# SECURITY
-def cp(pp:str,hp:str) -> bool:
+
+def check_password(
+    password: str,
+    hashed_password: str
+) -> bool:
     try:
-        return bcrypt.checkpw(pp.encode('utf-8'), hp.encode('utf-8'))
+        return bcrypt.checkpw(
+            password.encode('utf-8'),
+            hashed_password.encode('utf-8')
+        )
     except Exception:
         return False
 
@@ -16,186 +23,186 @@ if 'failed_attempts' not in st.session_state:
 
 if not st.session_state.authenticated:
     with st.sidebar:
-        ip = st.text_input('ip',type='password',key='ip',label_visibility='collapsed',placeholder='ip')
-        if st.button('login',width='stretch'):
+        input_password = st.text_input(
+            'Password',
+            type='password',
+            key='input_password',
+            label_visibility='collapsed',
+            placeholder='Key'
+        )
+        if st.button(
+            'Login',
+            width='stretch'
+        ):
             try:
-                sp = st.secrets['hp']
+                hp = st.secrets['hp']
             except Exception:
-                st.error('sp empty')
+                st.toast(
+                    'Key not found',
+                    icon='🚨',
+                    duration='infinite'
+                )
                 st.stop()
-            if cp(ip,sp):
+            if check_password(input_password, hp):
                 st.session_state.authenticated = True
-                st.success('True')
+                st.session_state.failed_attempts = 0
+                st.toast(
+                    'Login successful',
+                    icon='🔓',
+                    duration='infinite'
+                )
                 st.rerun()
             else:
                 st.session_state.failed_attempts += 1
-                st.error('False')
+                st.toast(
+                    'Login failed',
+                    icon='🔐',
+                    duration='infinite'
+                )
                 if st.session_state.failed_attempts >= 10:
-                    st.warning('hacker?')
-else:
-    with st.sidebar:
-        pageStatus = st.progress(0)
-        if st.button('logout',width='stretch'):
-            st.session_state.authenticated = False
-            st.success("Bye")
-            st.session_state.failed_attempts = 0
-            st.rerun()
-    
-    # BASE FUNCTION ---
-    def selectTable(table:str):
-        url = st.secrets['url']
-        key = st.secrets['key']
-        db = create_client(url,key)
-        execute = (
-            db.table(table)
-            .select('*')
-            .execute()
-        )
-        df = execute.data
-        return df
+                    st.toast(
+                        'Possible unauthorized attempt',
+                        icon='🔐',
+                        duration='infinite'
+                    )
+    st.stop() 
 
-    def updateTable(
-        table:str,
-        column:str,
-        value:str,
-        rowid
-    ):
-        url = st.secrets['url']
-        key = st.secrets['key']
-        db = create_client(url,key)
-        execute = (
-            db.table(table)
-            .update({f'{column}':f'{value}'})
-            .eq('id', rowid)
-            .execute()
-        )
-
-
-    # DATA TABLE
-    dataProject = selectTable('project')
-    dataProfile = selectTable('profile')
-    dataMessage = selectTable('message')
-
-
-    # FUNCTION AND COMPONENT PROFILE
-    def updateImage(column):
-        st.image(dataProfile[0][column])
-        update = st.text_input(label=f':red[**{column}**] : {dataProfile[0][column]}',label_visibility='collapsed')
-        status = st.progress(0)
-        if st.button(f'commit {column}',width='stretch'):
-            status.progress(40)
-            updateTable(
-                table='profile',
-                column=column,
-                value=update,
-                rowid=1
-            )
-            status.progress(100)
-            st.rerun()
-
-    def updateProfile(column):
-        update = st.text_input(label=f':red[**{column}**] : {dataProfile[0][column]}')
-        status = st.progress(0)
-        if st.button(f'commit {column}',width='stretch'):
-            status.progress(40)
-            updateTable(
-                table='profile',
-                column=column,
-                value=update,
-                rowid=1
-            )
-            status.progress(100)
-            st.rerun()
-
-    def updateAbout(column):
-        update = st.text_area(label=f':red[**{column}**] : {dataProfile[0][column]}')
-        status = st.progress(0)
-        if st.button(f'commit {column}',width='stretch'):
-            status.progress(40)
-            updateTable(
-                table='profile',
-                column=column,
-                value=update,
-                rowid=1
-            )
-            status.progress(100)
-            st.rerun()
-
-
-    # LAYOUT ---
-    st.set_page_config(
-        page_title='rahmadip Panel',
-        page_icon=':material/chess_knight:',
-        layout='wide'
+def logout():
+    st.session_state.authenticated = False
+    st.session_state.failed_attempts = 0
+    st.toast(
+        'Logged out successfully',
+        icon='🔒',
+        duration='infinite'
     )
 
-    project,profile,messages = st.tabs(['PROJECT','PROFILE','MESSAGES'])
-    with project:
-        tableProjectC, crudPanel = st.columns([4,1])
-        with tableProjectC:
-            tableProjectPanel = st.dataframe(
-                dataProject,
-                height=695,
-                row_height=50
-            )
-        with crudPanel:
-            updateProject,insertProject,deleteProject = st.tabs(['UPDATE','INSERT','DELETE'])
-            with updateProject:
-                columnUpdateProject = st.selectbox('Column target',options=dataProject[0].keys())
-                rowUpdateProject = st.selectbox('Row target berdasarkan id', options=[row['id'] for row in dataProject])
-                valueUpdateProject = st.text_input('Value update')
-                statusUpdateProject = st.progress(0)
-                if st.button('UPDATE PROJECT',width='stretch'):
-                    updateTable(
-                        table='project',
-                        column=columnUpdateProject,
-                        value=valueUpdateProject,
-                        rowid=rowUpdateProject
-                    )
-                    statusUpdateProject.progress(100)
-                    st.rerun()
+@st.cache_resource
+def connection():
+    try:
+        return st.connection(
+            'supabase',
+            type=SupabaseConnection
+        )
+    except Exception as error:
+        st.toast(
+            error,
+            icon='🚨',
+            duration='infinite'
+        )
+        st.stop()
 
-    with profile:
-        profileC2 = st.container()
-        with profileC2:
-            profileC2a,profileC2b,profileC2c = st.columns(3)
-            with profileC2a:
-                updateProfile('name')
-            with profileC2b:
-                updateProfile('occupation')
-            with profileC2c:
-                updateProfile('domicile')
-        st.divider()
-        profileC3 = st.container()
-        with profileC3:
-            profileC3a,profileC3b,profileC3c = st.columns(3)
-            with profileC3a:
-                updateProfile('email')
-            with profileC3b:
-                updateProfile('number')
-            with profileC3c:
-                updateProfile('linkedin')
-        st.divider()
-        profileC4 = st.container()
-        with profileC4:
-            profileC4a,profileC4b,profileC4c = st.columns(3)
-            with profileC4a:
-                updateProfile('behance')
-            with profileC4b:
-                updateProfile('instagram')
-            with profileC4c:
-                updateProfile('discord')
-        st.divider()
-        profileC1 = st.container()
-        with profileC1:
-            profileC1a,profileC1b,profileC1c = st.columns(3)
-            with profileC1a:
-                updateImage('banner')
-            with profileC1b:
-                updateImage('photo')
-            with profileC1c:
-                updateAbout('about')
-    with messages:
-        st.table(dataMessage,border='horizontal')
-    
-    pageStatus.progress(100)
+@st.cache_data(ttl=600)
+def fetch(
+    table: str,
+    primary: str
+):
+    try:
+        select = (
+            connection()
+            .table(table)
+            .select('*')
+            .order(primary, desc=False)
+            .execute()
+        )
+        df = select.data
+        return pd.DataFrame(df)
+    except Exception as error:
+        st.toast(
+            error,
+            icon='🚨',
+            duration='infinite'
+        )
+        return pd.DataFrame()
+
+def commit(
+    table: str,
+    primary: str,
+    data_changes: dict,
+    original_data: pd.DataFrame
+):
+    st.toast(
+        'Executing Commit',
+        icon='🔨',
+        duration='infinite'
+    )
+    changes_committed = False
+    if data_changes['deleted_rows']:
+        for row_idx in data_changes['deleted_rows']:
+            pk_value = original_data.iloc[row_idx][primary]
+            try:
+                delete = (
+                    connection()
+                    .table(table)
+                    .delete()
+                    .eq(primary, pk_value)
+                    .execute()
+                )
+                st.toast(
+                    'Successfully delete data',
+                    icon='🗑️',
+                    duration='infinite'
+                )
+                changes_committed = True
+            except Exception as error:
+                st.toast(
+                    f'Failed to delete data | {error}',
+                    icon='🚨',
+                    duration='infinite'
+                )
+    if data_changes['edited_rows']:
+        for row_idx, updates in data_changes['edited_rows'].items():
+            pk_value = original_data.iloc[row_idx][primary]
+            updateData = {
+                key: value for key,
+                value in updates.items() if key != primary
+            }
+            if updateData:
+                try:
+                    update = (
+                        connection()
+                        .table(table)
+                        .update(updateData)
+                        .eq(primary, pk_value)
+                        .execute()
+                    )
+                    st.toast(
+                        'Successfully update data',
+                        icon='📝',
+                        duration='infinite'
+                    )
+                    changes_committed = True
+                except Exception as error:
+                    st.toast(
+                        f'Failed to update data | {error}',
+                        icon='🚨',
+                        duration='infinite'
+                    )  
+    if data_changes['added_rows']:
+        for new_row in data_changes['added_rows']:
+            insertData = {
+                key: value for key,
+                value in new_row.items() if key != primary
+            }
+            try:
+                insert = (
+                    connection()
+                    .table(table)
+                    .insert(insertData)
+                    .execute()
+                )
+                st.toast(
+                    'Successfully insert data',
+                    icon='📑',
+                    duration='infinite'
+                )
+                changes_committed = True
+            except Exception as error:
+                st.toast(
+                    f'Failed to insert data | {error}',
+                    icon='🚨',
+                    duration='infinite'
+                )
+    if changes_committed:
+        st.cache_data.clear()
+        return True
+    return False

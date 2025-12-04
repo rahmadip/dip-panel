@@ -1,22 +1,77 @@
 [theme]
 base = 'dark'
-primaryColor = '#ffa200'
-backgroundColor = '#0a0a0a'
-secondaryBackgroundColor = '#101010'
-textColor = '#fafafa'
-linkColor = '#ffa200'
-codeBackgroundColor = '#101010'
+
+primaryColor = '#fffce1'
+backgroundColor = '#0e100f'
+secondaryBackgroundColor = '#0e100f'
+textColor = '#fffce1'
+
+redColor = '#f20000'
+redBackgroundColor = '#f2000030'
+redTextColor = '#f20000'
+
+orangeColor = '#ff8709'
+orangeBackgroundColor = '#ff870930'
+orangeTextColor = '#ff8709'
+
+yellowColor = '#fff01f'
+yellowBackgroundColor = '#fff01f30'
+yellowTextColor = '#fff01f'
+
+blueColor = '#00bae2'
+blueBackgroundColor = '#00bae230'
+blueTextColor = '#00bae2'
+
+greenColor = '#0ae448'
+greenBackgroundColor = '#0ae44830'
+greenTextColor = '#0ae448'
+
+violetColor = '#9d95ff'
+violetBackgroundColor = '#9d95ff30'
+violetTextColor = '#9d95ff'
+
+grayColor = '#262626'
+grayBackgroundColor = '#26262630'
+grayTextColor = '#262626'
+
+linkColor = '#ff8709'
+linkUnderline = false
+
 font = 'Plus Jakarta Sans'
-baseFontSize = 14
+baseFontSize = 16
 baseFontWeight = 400
+
 headingFont = 'Plus Jakarta Sans'
-headingFontSizes = ['2.75rem', '2.25rem', '1.75rem', '1.5rem', '1.25rem', '1rem']
-headingFontWeights = 600
-codeFont = 'monospace'
+headingFontSizes = [
+    '2.5rem',
+    '2.5rem',
+    '1.5rem',
+    '1.5rem',
+    '1.5rem',
+    '1.5rem'
+]
+headingFontWeights = [
+    700,
+    700,
+    700,
+    700,
+    700,
+    700
+]
+
+codeTextColor = '#ff8709'
+codeBackgroundColor = '#ff870930'
+codeFont = 'Plus Jakarta Sans'
 codeFontSize = '1rem'
 codeFontWeight = 400
-baseRadius = 'medium'
-buttonRadius = 'medium'
-borderColor = '#1f1f1f'
-dataframeBorderColor = '#1f1f1f'
-dataframeHeaderBackgroundColor = '#101010'
+
+baseRadius = 'small'
+buttonRadius = 'small'
+
+borderColor = '#262626'
+
+dataframeBorderColor = '#262626'
+dataframeHeaderBackgroundColor = '#0e100f'
+
+showWidgetBorder = true
+showSidebarBorder = true
