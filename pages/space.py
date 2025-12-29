@@ -2,10 +2,10 @@ import streamlit as st
 from streamlit_app import fetch, commit, logout
 
 PAGE_NAME = 'Space'
-TABLE_NAME = 'svg' 
+TABLE_NAME = 'space' 
 PRIMARY_KEY = 'id'  
-EDITOR_KEY = 'panel_svg'
-DF_DATA = 'df_svg'
+EDITOR_KEY = 'panel_space'
+DF_DATA = 'df_space'
 
 if 'needs_reload' not in st.session_state:
     st.session_state.needs_reload = False

@@ -1,11 +1,11 @@
 import streamlit as st
 from streamlit_app import fetch, commit, logout
 
-PAGE_NAME = 'Projects'
-TABLE_NAME = 'projects' 
-PRIMARY_KEY = 'id'
-EDITOR_KEY = 'panel_projects'
-DF_DATA = 'df_projects'
+PAGE_NAME = 'Tools'
+TABLE_NAME = 'tools' 
+PRIMARY_KEY = 'id'  
+EDITOR_KEY = 'panel_tools'
+DF_DATA = 'df_tools'
 
 if 'needs_reload' not in st.session_state:
     st.session_state.needs_reload = False

@@ -2,10 +2,10 @@ import streamlit as st
 from streamlit_app import fetch, commit, logout
 
 PAGE_NAME = 'Profile'
-TABLE_NAME = 'info' 
-PRIMARY_KEY = 'id'  
-EDITOR_KEY = 'panel_info'
-DF_DATA = 'df_info'
+TABLE_NAME = 'rahmadip' 
+PRIMARY_KEY = 'id'
+EDITOR_KEY = 'panel_profile'
+DF_DATA = 'df_profile'
 
 if 'needs_reload' not in st.session_state:
     st.session_state.needs_reload = False
